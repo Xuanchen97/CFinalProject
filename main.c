@@ -2,6 +2,7 @@
 #include <time.h>
 #include <string.h>
 
+
 // This hashing function is the djb2 hash function implementation.
 // You do NOT have to use this hash function - if you find another hash
 // function you like better, feel free to use it.
@@ -41,14 +42,47 @@ void checkChain(struct Block *genesisBlock) {
 
     // if (chainValid == true) { printf("CHAIN IS VALID!\n"); }
     // else { printf("CHAIN INVALID"); }
-
-
 }
 
 
 
 
 int main() {
+    int op;
+    do {
+        printf("Choose an option:\n");
+        printf("\n 1. Add a new block to the chain");
+        printf("\n 2. View the chain ");
+        printf("\n 3. Check chain validity ");
+        printf("\n 4. Search for a block ");
+        printf("\n 5. Mine new block ");
+        printf("\n 0. Exit");
+        printf("\n\n Enter your choice:");
+        scanf("%d", &op);
+
+        switch (op) {
+            case 1:
+                break;
+            case 2:
+                break;
+            case 3:
+                break;
+            case 4:
+                break;
+            case 5:
+                break;
+
+            case 0:
+                return 0;
+
+            default:
+                printf("Please Enter a valid number!");
+                break;
+
+        }
+    } while (1);
+
+
 
 
 
