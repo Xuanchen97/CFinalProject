@@ -21,12 +21,6 @@ unsigned long hash(unsigned char *str)
     return hash;
 }
 
-unsigned long GenerateHashForBlock(unsigned long previousHash, time_t currentTime, char* data){
-    unsigned char dataToHash[] = {previousHash + currentTime + data};
-
-    return hash(dataToHash);
-}
-
 
 typedef struct _Block {
     // @TODO: Fill in the properites of a block
@@ -45,8 +39,9 @@ typedef struct _BlockChain {
 
 
 unsigned long calculateHash(unsigned char * blockData, long currentTime, unsigned long previousHash) {
-    // @TODO: Write a function to calculate the hash of a block.
-    return 0;
+    unsigned char dataToHash[] = {previousHash + currentTime + blockData};
+
+    return hash(dataToHash);
 }
 
 void checkChain(Block *genesisBlock) {
@@ -81,7 +76,7 @@ int main() {
     rootBlock.data = "Christian";
     rootBlock.previousHash = 0;
     rootBlock.currentTime = curTime;
-    rootBlock.myHash = GenerateHashForBlock(0, curTime, rootBlock.data);
+    rootBlock.myHash = calculateHash(0, curTime, rootBlock.data);
 
     blockChain.blocks[0] = rootBlock;
 
