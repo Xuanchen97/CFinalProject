@@ -23,15 +23,13 @@ unsigned long hash(unsigned char *str)
 
 
 typedef struct _Block {
-    // @TODO: Fill in the properites of a block
-    char *data;
+    char* data;
     time_t currentTime;
     unsigned long previousHash;
     unsigned long myHash;
 } Block;
 
 typedef struct _BlockChain {
-    // @TODO: Fill in the properties of a block chain
     Block blocks[200];
 
 } BlockChain;
@@ -39,24 +37,40 @@ typedef struct _BlockChain {
 
 
 unsigned long calculateHash(unsigned char * blockData, long currentTime, unsigned long previousHash) {
-    unsigned char dataToHash[] = {previousHash + currentTime + blockData};
+    unsigned char dataToHash[500] = "";
+    snprintf(dataToHash, sizeof(dataToHash), "%lu%ld%s", previousHash, currentTime, blockData);
 
     return hash(dataToHash);
 }
 
-void checkChain(Block *genesisBlock) {
-    //@TODO: Write the code to check if the block chain is valid
-    // Your code should look something like this:
+unsigned long calculateHashWithXFactor(unsigned char * blockData, long currentTime, unsigned long previousHash, int xFactor) {
+    unsigned char dataToHash[500] = "";
+    snprintf(dataToHash, sizeof(dataToHash), "%lu%ld%s%d", previousHash, currentTime, blockData, xFactor);
 
-    // if (chainValid == true) { printf("CHAIN IS VALID!\n"); }
-    // else { printf("CHAIN INVALID"); }
+    return hash(dataToHash);
+}
+
+void checkChain(BlockChain* blockChain) {
+    for(int i = 0; i < 200; i++){
+        Block currentBlock = blockChain->blocks[i];
+
+        unsigned long hashedResult = calculateHash(currentBlock.data, currentBlock.currentTime, currentBlock.previousHash);
+
+        if(currentBlock.data != NULL && hashedResult != currentBlock.myHash){
+
+            printf("\nChain is not valid!\n");
+            return;
+        }
+    }
+
+    printf("\nChain is valid!\n");
 }
 
 void PrintBlockChain(BlockChain* blockChain){
     for(int i = 0; i < 200; i++){
         Block currentBlock = blockChain->blocks[i];
         if(currentBlock.data != NULL){
-            printf("Block %d: %lu\n", i, currentBlock);
+            printf("Block %d: %lu\n", i, currentBlock.myHash);
             printf("\tData = %s\n", currentBlock.data);
             printf("\tPrevious Hash: %lu\n", currentBlock.previousHash);
         }
@@ -64,61 +78,137 @@ void PrintBlockChain(BlockChain* blockChain){
     }
 }
 
+void CreateAnotherBlock(BlockChain *blockChain, char data[]){
+    char* name = NULL;
+    name = strdup(data);
+    for(int i = 0; i < 200; i++){
+        Block currentBlock = blockChain->blocks[i];
+        Block nextBlock;
+        if(i < 199)
+            nextBlock = blockChain->blocks[i+1];
+        if(nextBlock.data == NULL){
+            time_t currentTime = time(NULL);
+
+            Block* newBlock = malloc(sizeof(Block));
+            newBlock->data = name;
+            newBlock->previousHash = currentBlock.myHash;
+            newBlock->currentTime = currentTime;
+            newBlock->myHash = calculateHash(name, currentTime, currentBlock.myHash);
+
+            blockChain->blocks[i+1] = *newBlock;
+            blockChain->blocks[i+2].data = NULL;
+
+            break;
+        }
+    }
+
+    return;
+}
+
+void MineNewBlock(BlockChain* blockChain){
+    for(int i = 0; i < 200; i++){
+        Block currentBlock = blockChain->blocks[i];
+
+        if(currentBlock.data == NULL){
+            time_t currentTime = time(NULL);
+
+            int xFactor = 0;
+            while(1){
+                unsigned long hashedValue =
+                        calculateHashWithXFactor("ChristianNJason", currentTime, currentBlock.myHash, xFactor);
+
+                if(hashedValue % 13 == 0){
+                    CreateAnotherBlock(blockChain, "Christian N Jason Assignment");
+                    printf("\nFound a new block!\n");
+                    return;
+                }
+
+                xFactor++;
+            }
+        }
+    }
+}
+
+void SearchABlock(char* data, BlockChain* blockChain){
+    Block* currentBlock = malloc(sizeof(Block));
+    for(int i = 0; i < 200; i++){
+        char* name = NULL;
+        name = strdup(data);
+
+        currentBlock = &blockChain->blocks[i];
+
+        if(currentBlock->data != NULL && strcmp(currentBlock->data, name) == 0){
+            printf("\nYeah, block is in the chain\n");
+            return;
+        }
+
+        if(currentBlock->data == NULL) break;
+    }
+
+    printf("\nNope, the block with that data is not on the chain\n");
+    return;
+}
+
+
 
 int main() {
+    BlockChain* blockChain = malloc(sizeof(BlockChain));
+    Block* rootBlock = malloc(sizeof(Block));
+    time_t curTime = time(NULL);
 
+    rootBlock->data = "Christian";
+    rootBlock->previousHash = 0;
+    rootBlock->currentTime = curTime;
+    rootBlock->myHash = calculateHash(rootBlock->data , curTime,0);
 
-
-    BlockChain blockChain;
-    Block rootBlock;
-    time_t curTime;
-
-    rootBlock.data = "Christian";
-    rootBlock.previousHash = 0;
-    rootBlock.currentTime = curTime;
-    rootBlock.myHash = calculateHash(0, curTime, rootBlock.data);
-
-    blockChain.blocks[0] = rootBlock;
-
-    PrintBlockChain(&blockChain);
+    blockChain->blocks[0] = *rootBlock;
+    //blockChain->blocks[1].data = NULL;
 
 
     int op;
     do {
+        printf("-----------------\n");
         printf("Choose an option:\n");
-        printf("\n 1. Add a new block to the chain");
-        printf("\n 2. View the chain ");
-        printf("\n 3. Check chain validity ");
-        printf("\n 4. Search for a block ");
-        printf("\n 5. Mine new block ");
-        printf("\n 0. Exit");
-        printf("\n\n Enter your choice:");
+        printf("1. Add a new block to the chain\n");
+        printf("2. View the chain \n");
+        printf("3. Check chain validity \n");
+        printf("4. Search for a block \n");
+        printf("5. Mine new block \n");
+        printf("0. Exit\n");
+        printf("Enter your choice: ");
         scanf("%d", &op);
 
+        char word[25];
         switch (op) {
             case 1:
+                printf("Please enter the data you want for the block: ");
+                scanf("%s", word);
+                CreateAnotherBlock(blockChain, word);
                 break;
             case 2:
-                PrintBlockChain(&blockChain);
+                PrintBlockChain(blockChain);
                 break;
             case 3:
+                checkChain(blockChain);
                 break;
             case 4:
+                printf("Please enter the data you want to search: ");
+                scanf("%s", word);
+                SearchABlock(word, blockChain);
                 break;
             case 5:
+                printf("\nMining in progress");
+                MineNewBlock(blockChain);
                 break;
-
             case 0:
                 return 0;
-
             default:
                 printf("Please Enter a valid number!");
                 break;
-
         }
-    } while (1);
+    } while (op != 0);
 
-
+    return 0;
 }
 
 
