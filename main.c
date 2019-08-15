@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <string.h>
+#include <stdlib.h>
 
 
 // This hashing function is the djb2 hash function implementation.
@@ -20,14 +21,26 @@ unsigned long hash(unsigned char *str)
     return hash;
 }
 
+unsigned long GenerateHashForBlock(unsigned long previousHash, time_t currentTime, char* data){
+    unsigned char dataToHash[] = {previousHash + currentTime + data};
 
-struct Block {
+    return hash(dataToHash);
+}
+
+
+typedef struct _Block {
     // @TODO: Fill in the properites of a block
-};
+    char *data;
+    time_t currentTime;
+    unsigned long previousHash;
+    unsigned long myHash;
+} Block;
 
-struct BlockChain {
+typedef struct _BlockChain {
     // @TODO: Fill in the properties of a block chain
-};
+    Block blocks[200];
+
+} BlockChain;
 
 
 
@@ -36,7 +49,7 @@ unsigned long calculateHash(unsigned char * blockData, long currentTime, unsigne
     return 0;
 }
 
-void checkChain(struct Block *genesisBlock) {
+void checkChain(Block *genesisBlock) {
     //@TODO: Write the code to check if the block chain is valid
     // Your code should look something like this:
 
@@ -44,10 +57,37 @@ void checkChain(struct Block *genesisBlock) {
     // else { printf("CHAIN INVALID"); }
 }
 
-
+void PrintBlockChain(BlockChain* blockChain){
+    for(int i = 0; i < 200; i++){
+        Block currentBlock = blockChain->blocks[i];
+        if(currentBlock.data != NULL){
+            printf("Block %d: %lu\n", i, currentBlock);
+            printf("\tData = %s\n", currentBlock.data);
+            printf("\tPrevious Hash: %lu\n", currentBlock.previousHash);
+        }
+        else return;
+    }
+}
 
 
 int main() {
+
+
+
+    BlockChain blockChain;
+    Block rootBlock;
+    time_t curTime;
+
+    rootBlock.data = "Christian";
+    rootBlock.previousHash = 0;
+    rootBlock.currentTime = curTime;
+    rootBlock.myHash = GenerateHashForBlock(0, curTime, rootBlock.data);
+
+    blockChain.blocks[0] = rootBlock;
+
+    PrintBlockChain(&blockChain);
+
+
     int op;
     do {
         printf("Choose an option:\n");
@@ -64,6 +104,7 @@ int main() {
             case 1:
                 break;
             case 2:
+                PrintBlockChain(&blockChain);
                 break;
             case 3:
                 break;
@@ -83,10 +124,10 @@ int main() {
     } while (1);
 
 
+}
 
 
-
-
+/*
     // Example 1: How to generate a HASH of a string
     // ---------------------------
 
@@ -119,6 +160,6 @@ int main() {
     printf("----------\n");
 
     return 0;
-}
+*/
 
 
